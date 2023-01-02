@@ -1,0 +1,6 @@
+mastodon.py
+matplotlib
+pandas
+sqlalchemy
+vader-multi
+numpy
