@@ -4,3 +4,4 @@ instance
 __pycache__
 hedonodon_clientcred.secret
 hedonodon_usercred.secret
+.fleet
