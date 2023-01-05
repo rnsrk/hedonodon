@@ -5,7 +5,7 @@ class Toots(Base):
     __tablename__ = 'Toots'
     __table_args__ = {'extend_existing': True}
     index = Column(Integer, primary_key=True)
-    compound =  Column(Float)
+    model = Column(String(30))
     datetime = Column(Date)
     language = Column(String(3))
     sentiment = Column(String(8))
@@ -16,18 +16,17 @@ class Toots(Base):
 
 
 
-class Sentiments(Base):
-    __tablename__ = 'Sentiments'
+class SentimentCounts(Base):
+    __tablename__ = 'SentimentCounts'
     __table_args__ = {'extend_existing': True}
     index = Column(Integer, primary_key=True)
     sentimentCount = Column(Integer)
-    date = Column(Date, primary_key =  True)
+    date = Column(Date, primary_key=True)
     sentiment = Column(String(8))
 
-
-class Compounds(Base):
-    __tablename__ = 'Compounds'
+class SentimentMeans(Base):
+    __tablename__ = 'SentimentMeans'
     __table_args__ = {'extend_existing': True}
     index = Column(Integer, primary_key=True)
-    date = Column(Date, primary_key =  True)
-    compoundAvg = Column(Float)
+    date = Column(Date, primary_key=True)
+    SentimentsMean = Column(Float)

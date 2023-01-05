@@ -1,9 +1,9 @@
+from langdetect import detect
 import pytz
 import pandas as pd
 import re
 from SentiTooter import SentiTooter
 from pprint import pprint
-
 
 class TootCrawler():
 
@@ -13,29 +13,34 @@ class TootCrawler():
         self.sentiTooter = SentiTooter()
         self.localTimezone = pytz.timezone('Europe/Berlin')
 
-    def getLocalTimeline(self,  sinceId=None):
-        return  self.mastodonInstance.timeline_local(since_id=sinceId)
+    def getLocalTimeline(self, minId=None):
+        return self.mastodonInstance.timeline_local(min_id=minId, limit=500)
 
     def cleanhtml(self, raw_html):
         cleantext = re.sub(self.compilePattern, '', raw_html)
         cleantext = re.sub(r'http\S+', '', cleantext)
         return cleantext
 
-    def buildTootsDataframe(self, sinceId=None):
+    def buildTootsDataframe(self, minId=None):
         toots = []
+        allTimelineResults = []
+        timelinePagination = self.getLocalTimeline(minId)
 
-        for i in self.getLocalTimeline(sinceId):
+        while timelinePagination:
+            allTimelineResults = allTimelineResults + timelinePagination
+            timelinePagination = self.mastodonInstance.fetch_previous(timelinePagination)
+        for i in allTimelineResults:
             content = self.cleanhtml(i.content)
             sentiment = self.sentiTooter.analyze(i)
             toots.append(
                     {
                             "sentiment": sentiment[0],
-                            "compound": sentiment[1],
+                            "model": sentiment[1],
                             "userName": i.account.display_name,
                             "userId": i.account.id,
                             "toot": content,
                             "datetime": i.created_at.astimezone(self.localTimezone),
-                            "language": i.language,
+                            "language": detect(content),
                             "tootId": i.id
                     }
                 )

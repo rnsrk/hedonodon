@@ -5,3 +5,7 @@ __pycache__
 hedonodon_clientcred.secret
 hedonodon_usercred.secret
 .fleet
+test.py
+.idea
+cardiffnlp
+venv

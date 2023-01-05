@@ -1,12 +1,10 @@
-from CRUDManager import CRUDManager
+from CRUDManager import CRUDManager, calculateSentimentCount, calculateSentimentMean
 from datetime import datetime, date
 from DbSetup import init_db
 import locale
 from MastodonAccountManager import MastodonAccountManager
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MultipleLocator
-import numpy as np
 from TootCrawler import TootCrawler
 
 locale.setlocale(locale.LC_TIME, "en_EN.UTF-8")
@@ -27,31 +25,38 @@ crudManager = CRUDManager()
 
 lastTootId = crudManager.getLastToot()
 tootsDataframe = tootCrawler.buildTootsDataframe(lastTootId)
-sentimentsYesterday = crudManager.calculateAggregates('sentiment', 'Count')
+
+if not tootsDataframe.empty:
+    crudManager.saveToDatabase(tootsDataframe, 'Toots', useIndex=False)
+else:
+    print('Nothing changed since last database insert!')
+
+sentimentsYesterday = calculateSentimentCount()
+sentimentMeansYesterday = calculateSentimentMean(sentimentsYesterday)
+
+if not tootsDataframe.empty:
+    crudManager.saveToDatabase(dataframe=sentimentsYesterday, table='SentimentCounts', useIndex=True)
+    crudManager.saveToDatabase(dataframe=sentimentMeansYesterday, table='SentimentMeans', useIndex=True)
+else:
+    print('Nothing changed since last database insert!')
 
 colormap = {
-    'negative"': '#ff9999',
+    'negative': '#ff9999',
     'neutral': '#ffcc99',
     "positive": '#99ff99'
 }
 
 todaysColors = []
 for sentiment in sentimentsYesterday['sentiment'].to_numpy():
-     todaysColors.append(colormap[sentiment])
+    todaysColors.append(colormap[sentiment])
 
-compoundsYesterday = crudManager.calculateAggregates('compound', 'Avg')
-if not tootsDataframe.empty:
-     crudManager.saveToDatabase(tootsDataframe, 'Toots', useIndex=False)
-     crudManager.saveToDatabase(dataframe=sentimentsYesterday, table='Sentiments', useIndex=True)
-     crudManager.saveToDatabase(dataframe=compoundsYesterday, table='Compounds', useIndex=True)
-else:
-     print('Nothing changed since last database insert!')
 
-TodayDate= datetime.strptime(sentimentsYesterday['date'][0], '%Y-%m-%d').strftime('%d.%m.%Y')
+
+TodayDate = datetime.strptime(sentimentsYesterday['date'][0], '%Y-%m-%d').strftime('%d.%m.%Y')
 dataframe4PieChart = sentimentsYesterday.drop('date', axis=1).set_index('sentiment')
-dataframe4LineChart = crudManager.loadFromDatabase('Compounds', 'date').drop('index', axis=1)
+dataframe4LineChart = crudManager.loadFromDatabase('SentimentMeans', 'date').drop('index', axis=1)
 
-fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10,10))
+fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
 
 # Pie chart.
 pieChartlabels = dataframe4PieChart.index.to_numpy()
@@ -61,24 +66,22 @@ pieChart = dataframe4PieChart.plot.pie(
     ylabel="",
     labels=dataframe4PieChart['sentimentCount'],
     title=f'Moods of the toots on {TodayDate} of the local timeline on fedihum.org',
-    colors = todaysColors,
+    colors=todaysColors,
     wedgeprops=dict(linewidth=3, edgecolor='w'),
     startangle=90
 )
 
 axes[0].axis('equal')
-centre_circle = plt.Circle((0,0),0.6,fc='white')
+centre_circle = plt.Circle((0, 0), 0.6, fc='white')
 axes[0].add_patch(centre_circle)
 chartBox = axes[0].get_position()
-axes[0].set_position([chartBox.x0,chartBox.y0-0.2,chartBox.width,chartBox.height])
-axes[0].legend(pieChartlabels,loc='upper right', bbox_to_anchor=(0.8, 0.9))
-
+axes[0].legend(pieChartlabels, loc='upper right', bbox_to_anchor=(0.9, 0.9))
 
 # Line chart.
 lineChart = dataframe4LineChart.plot.line(
     ax=axes[1],
-    title='Compounds from max positive (1) to min negative (-1)'
-    )
+    title='Mean of all sentiments from max positive (1) to min negative (-1)'
+)
 axes[1].grid(True)
 axes[1].set_xlim([date(2023, 1, 1), date(2023, 12, 31)])
 axes[1].set_ylim([-1, 1])
@@ -88,8 +91,9 @@ axes[1].xaxis.set_major_formatter(plt.NullFormatter())
 axes[1].xaxis.set_minor_formatter(mdates.DateFormatter('%h'))
 axes[1].tick_params(which='minor', length=0)
 plotFileUrl = f'./plots/{TodayDate}.png'
-plt.show()
 plt.savefig(plotFileUrl)
 
+"""
 media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the compounds up to {TodayDate}.")
 mastodonInstance.status_post(f'The moods of the toots on and up to {TodayDate}.', media_ids=media, language='en')
+"""
