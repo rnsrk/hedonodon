@@ -93,7 +93,7 @@ axes[1].tick_params(which='minor', length=0)
 plotFileUrl = f'./plots/{TodayDate}.png'
 plt.savefig(plotFileUrl)
 
-"""
-media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the compounds up to {TodayDate}.")
+
+media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the sentiment mean up to {TodayDate}.")
 mastodonInstance.status_post(f'The moods of the toots on and up to {TodayDate}.', media_ids=media, language='en')
-"""
+

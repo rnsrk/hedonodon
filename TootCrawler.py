@@ -31,18 +31,18 @@ class TootCrawler():
             timelinePagination = self.mastodonInstance.fetch_previous(timelinePagination)
         for i in allTimelineResults:
             content = self.cleanhtml(i.content)
-            sentiment = self.sentiTooter.analyze(i)
-            toots.append(
-                    {
-                            "sentiment": sentiment[0],
-                            "model": sentiment[1],
-                            "userName": i.account.display_name,
-                            "userId": i.account.id,
-                            "toot": content,
-                            "datetime": i.created_at.astimezone(self.localTimezone),
-                            "language": detect(content),
-                            "tootId": i.id
-                    }
-                )
+            language = detect(content)
+            sentiment = self.sentiTooter.analyze(language, content)
+            toot = {
+                "sentiment": sentiment[0],
+                "model": sentiment[1],
+                "toot": content,
+                "datetime": i.created_at.astimezone(self.localTimezone),
+                "language": language,
+                "userName": i.account.display_name,
+                "userId": i.account.id,
+                "tootId": i.id
+            }
+            toots.append(toot)
         toots.sort(key=lambda item:item.get('datetime'))
         return pd.DataFrame.from_records(toots)
