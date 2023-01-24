@@ -31,21 +31,25 @@ class SentiTooter:
     def analyze(self, language, content):
         match language:
             case 'de':
-                sentiment = self.deModel.predict_sentiment([content])
-                sentiment.append('germanSentiment')
-                return sentiment
+                sentimentList, probabilitiesList = self.deModel.predict_sentiment([content], output_probabilities=True)
+                sentiment = sentimentList[0]
+                score = {i[0]: i[1] for i in probabilitiesList[0]}[sentiment]
+                return [sentiment, 'germanSentiment', score]
             case 'en':
                 text = preprocess(content)
                 encoded_input = self.enTokenizer(text, return_tensors='pt')
                 output = self.enModel(**encoded_input)
                 scores = output[0][0].detach().numpy()
                 scores = softmax(scores)
+                print(scores)
                 sentimentIndexWithMaxScore = np.argmax(scores)
                 sentimentLabel = self.labels[sentimentIndexWithMaxScore]
-                sentiment = [sentimentLabel, 'twitter-roberta-base-sentiment']
+                sentiment = [sentimentLabel, 'twitter-roberta-base-sentiment', max(scores)]
+                print(sentiment)
                 return sentiment
             case _:
                 compound = self.sia.polarity_scores(content)['compound']
+                print(self.sia.polarity_scores(content), 'vaderSentiment')
                 if compound > (1 / 3):
                     return ['positive', 'vaderSentiment']
                 elif compound < (-1 / 3):
