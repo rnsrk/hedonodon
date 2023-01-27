@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from TootCrawler import TootCrawler
 
-locale.setlocale(locale.LC_TIME, "en_EN.UTF-8")
+locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
 init_db()
 
 mastodonAccountManager = MastodonAccountManager()

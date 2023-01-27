@@ -1,6 +1,6 @@
-from DbSetup import engine, session, databaseUrl
+from DbSetup import connection, engine, session, databaseUrl
 import pandas as pd
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, sql
 from Tables import Toots
 
 
@@ -12,8 +12,8 @@ def calculateSentimentCount():
                 HAVING datetime >= DATE("now","-1 day")
                 AND datetime < DATE("now")'''
     return pd.read_sql(
-        query,
-        databaseUrl,
+        sql.text(query),
+        connection,
         parse_dates=["datetime"]
     )
 
@@ -41,7 +41,7 @@ class CRUDManager():
             print(f'Could not save data to {table}!')
 
     def loadFromDatabase(self, table:str, indexColumn=None):
-        return pd.read_sql_table(table, databaseUrl, index_col=indexColumn)
+        return pd.read_sql_table(table, connection, index_col=indexColumn)
 
     def getLastToot(self):
         stmt = select(Toots.tootId).order_by(desc('datetime'))
