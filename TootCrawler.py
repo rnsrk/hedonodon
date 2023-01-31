@@ -31,7 +31,10 @@ class TootCrawler():
             timelinePagination = self.mastodonInstance.fetch_previous(timelinePagination)
         for i in allTimelineResults:
             content = self.cleanhtml(i.content)
-            language = detect(content)
+            try:
+                language = detect(content)
+            except:
+                language = None
             sentiment = self.sentiTooter.analyze(language, content)
             toot = {
                 "sentiment": sentiment[0],
