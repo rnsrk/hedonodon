@@ -31,14 +31,14 @@ def calculateSentimentMean(dataframe):
         ]
     )
 
-def calculateWordCount():
-    query = f'''SELECT DATE(datetime) as date, language, sentiment, toot
+def getYesterdaysToots():
+    query = f'''SELECT datetime as date, language, sentiment, toot
                 FROM Toots
                 WHERE datetime >= DATE("now","-1 day")
                 AND datetime < DATE("now")'''
     return pd.read_sql(
-        query,
-        engine,
+        sql.text(query),
+        connection,
         parse_dates=["datetime"]
     )
 

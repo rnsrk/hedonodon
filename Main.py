@@ -1,4 +1,4 @@
-from CRUDManager import CRUDManager, calculateSentimentCount, calculateSentimentMean, calculateWordCount
+from CRUDManager import CRUDManager, calculateSentimentCount, calculateSentimentMean, getYesterdaysToots
 from datetime import datetime, date
 from DbSetup import init_db
 import locale
@@ -6,6 +6,7 @@ from MastodonAccountManager import MastodonAccountManager
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from TootCrawler import TootCrawler
+from SentiTooter import translateToots, countWords
 
 locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
 init_db()
@@ -31,7 +32,10 @@ if not tootsDataframe.empty:
 else:
     print('Nothing changed since last database insert!')
 
-wordCounts = calculateWordCount()
+yesterdaysToots = getYesterdaysToots()
+translatedToots = translateToots(yesterdaysToots)
+tootsSeries = translatedToots.toot
+wordCounts = countWords(tootsSeries.str.cat(sep=' '), 10)
 print(wordCounts);
 print("exit programm")
 exit()

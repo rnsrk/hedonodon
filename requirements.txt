@@ -10,3 +10,5 @@ transformers
 wheel
 germansentiment
 scipy
+deep_translator
+spacy

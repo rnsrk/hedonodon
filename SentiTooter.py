@@ -4,15 +4,17 @@ from scipy.special import softmax
 from transformers import AutoModelForSequenceClassification
 from transformers import AutoTokenizer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
+from deep_translator import GoogleTranslator
+import spacy
+from collections import Counter
 
 # Preprocess text (username and link placeholders)
 def preprocess(text):
     new_text = []
 
     for t in text.split(" "):
-        t = '@user' if t.startswith('@') and len(t) > 1 else t
-        t = 'http' if t.startswith('http') else t
+        t = '' if t.startswith('@') and len(t) > 1 else t
+        t = '' if t.startswith('http') else t
         new_text.append(t)
     return " ".join(new_text)
 
@@ -65,3 +67,33 @@ class SentiTooter:
         model = AutoModelForSequenceClassification.from_pretrained(self.enModelType)
         model.save_pretrained(self.enModelType)
         return model, tokenizer
+
+def translateToots(yesterdaysToots):
+    yesterdaysTootsTranslated = yesterdaysToots
+    for index, row in yesterdaysTootsTranslated.iterrows():
+        if (row['language'] != 'de'):
+            try:
+                yesterdaysTootsTranslated.at[index,'toot'] = translateToot(row['language'], row['toot'])
+                yesterdaysTootsTranslated.at[index,'language'] = 'de'
+            except:
+                yesterdaysTootsTranslated.drop(index)
+    return yesterdaysTootsTranslated
+
+def translateToot(language, toot):
+    content = preprocess(toot)
+    return GoogleTranslator(source=language, target='de').translate(content)
+
+def countWords(concatedToots, count):
+    nlp = spacy.load('de_core_news_sm')
+    doc = nlp(concatedToots)
+
+    # noun tokens that arent stop words or punctuations
+    nouns = [token.text
+            for token in doc
+            if (not token.is_stop and
+                not token.is_punct and
+                token.pos_ == "NOUN")]
+
+    # five most common noun tokens
+    noun_freq = Counter(nouns)
+    return noun_freq.most_common(count)
