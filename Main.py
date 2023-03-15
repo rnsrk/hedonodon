@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from TootCrawler import TootCrawler
 
-locale.setlocale(locale.LC_TIME, "en_EN.UTF-8")
+locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
 init_db()
 
 mastodonAccountManager = MastodonAccountManager()
@@ -84,7 +84,7 @@ axes[0].legend(pieChartlabels, loc='upper right', bbox_to_anchor=(0.9, 0.9))
 # Line chart.
 lineChart = dataframe4LineChart.plot.line(
     ax=axes[1],
-    title='Mean of all sentiments from max positive (1) to min negative (-1)'
+    title='"Mean" of sentiments, calculated from nominal values, pos(1), neu (0), neg (-1)!'
 )
 axes[1].grid(True)
 axes[1].set_xlim([date(2023, 1, 1), date(2023, 12, 31)])

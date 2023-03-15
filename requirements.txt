@@ -3,9 +3,10 @@ matplotlib
 pandas
 sqlalchemy
 vader-multi
+langdetect
 numpy
 pytz
 transformers
-langdetect
+wheel
 germansentiment
 scipy
