@@ -80,7 +80,7 @@ axes[0].legend(pieChartlabels, loc='upper right', bbox_to_anchor=(0.9, 0.9))
 # Line chart.
 lineChart = dataframe4LineChart.plot.line(
     ax=axes[1],
-    title='"Mean" of all sentiments. Please note that the sentiments are classified in a nominal scale: positive (1), neutral (0), and negative (-1) and NOT with compounds. Therefore this value indicates a tendency and not a correct statistical value.'
+    title='"Mean" of sentiments, calculated from nominal values, pos(1), neu (0), neg (-1)!'
 )
 axes[1].grid(True)
 axes[1].set_xlim([date(2023, 1, 1), date(2023, 12, 31)])
@@ -93,6 +93,6 @@ axes[1].tick_params(which='minor', length=0)
 plotFileUrl = f'./plots/{TodayDate}.png'
 plt.savefig(plotFileUrl)
 
-media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the sentiment mean up to {TodayDate}.")
+media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the sentiment mean up to {TodayDate}. Please note that the sentiments are classified in a nominal scale: positive (1), neutral (0), and negative (-1) and NOT with compounds. Therefore the mean indicates a tendency and not a correct statistical value.")
 mastodonInstance.status_post(f'The moods of the toots on and up to {TodayDate}.', media_ids=media, language='en')
 
