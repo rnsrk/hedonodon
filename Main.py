@@ -6,11 +6,12 @@ from MastodonAccountManager import MastodonAccountManager
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from TootCrawler import TootCrawler
-from SentiTooter import translateToots, countWords
+from SentiTooter import translateToots, createWordCountPerSentiment
 
 locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
 init_db()
 
+print('Initialize Mastodon...')
 mastodonAccountManager = MastodonAccountManager()
 mastodonInstance = mastodonAccountManager.instance
 """
@@ -20,34 +21,47 @@ mastodonInstance.log_in(
     to_file = 'hedonodon_usercred.secret'
 )
 """
+print('done!')
 
+print('Fetching recent toots...')
 tootCrawler = TootCrawler(mastodonInstance)
 crudManager = CRUDManager()
-
 lastTootId = crudManager.getLastToot()
 tootsDataframe = tootCrawler.buildTootsDataframe(lastTootId)
+print('done!')
 
+print('Save toots to database...')
 if not tootsDataframe.empty:
     crudManager.saveToDatabase(tootsDataframe, 'Toots', useIndex=False)
+    print('done!')
 else:
-    print('Nothing changed since last database insert!')
+    print('nothing changed since last database insert!')
 
+print('Calculate word counts...')
 yesterdaysToots = getYesterdaysToots()
 translatedToots = translateToots(yesterdaysToots)
-tootsSeries = translatedToots.toot
-wordCounts = countWords(tootsSeries.str.cat(sep=' '), 10)
-print(wordCounts);
-print("exit programm")
-exit()
-sentimentsYesterday = calculateSentimentCount()
-sentimentMeansYesterday = calculateSentimentMean(sentimentsYesterday)
+wordCountsPerSentiment = createWordCountPerSentiment(translatedToots)
+print('done!')
 
+print(wordCountsPerSentiment);
+
+print('Calculate sentiment counts...')
+sentimentsYesterday = calculateSentimentCount()
+print('done!')
+
+print('Calculate sentiment mean...')
+sentimentMeansYesterday = calculateSentimentMean(sentimentsYesterday)
+print('done!')
+
+print('Save calculations to database...')
 if not tootsDataframe.empty:
     crudManager.saveToDatabase(dataframe=sentimentsYesterday, table='SentimentCounts', useIndex=True)
     crudManager.saveToDatabase(dataframe=sentimentMeansYesterday, table='SentimentMeans', useIndex=True)
+    print('done!')
 else:
-    print('Nothing changed since last database insert!')
+    print('nothing changed since last database insert!')
 
+print('Create figure...')
 colormap = {
     'negative': '#ff9999',
     'neutral': '#ffcc99',
@@ -100,7 +114,8 @@ axes[1].xaxis.set_minor_formatter(mdates.DateFormatter('%h'))
 axes[1].tick_params(which='minor', length=0)
 plotFileUrl = f'./plots/{TodayDate}.png'
 plt.savefig(plotFileUrl)
+print('done!')
 
-#media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the sentiment mean up to {TodayDate}.")
-#mastodonInstance.status_post(f'The moods of the toots on and up to {TodayDate}.', media_ids=media, language='en')
+media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the sentiment mean up to {TodayDate}.")
+mastodonInstance.status_post(f'The moods of the toots on and up to {TodayDate}.\nWord counts per sentiment:\n{wordCountsPerSentiment}', media_ids=media, language='en')
 

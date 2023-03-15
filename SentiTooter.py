@@ -71,20 +71,20 @@ class SentiTooter:
 def translateToots(yesterdaysToots):
     yesterdaysTootsTranslated = yesterdaysToots
     for index, row in yesterdaysTootsTranslated.iterrows():
-        if (row['language'] != 'de'):
+        if (row['language'] != 'en'):
             try:
                 yesterdaysTootsTranslated.at[index,'toot'] = translateToot(row['language'], row['toot'])
-                yesterdaysTootsTranslated.at[index,'language'] = 'de'
+                yesterdaysTootsTranslated.at[index,'language'] = 'en'
             except:
                 yesterdaysTootsTranslated.drop(index)
     return yesterdaysTootsTranslated
 
 def translateToot(language, toot):
     content = preprocess(toot)
-    return GoogleTranslator(source=language, target='de').translate(content)
+    return GoogleTranslator(source=language, target='en').translate(content)
 
 def countWords(concatedToots, count):
-    nlp = spacy.load('de_core_news_sm')
+    nlp = spacy.load('en_core_web_md')
     doc = nlp(concatedToots)
 
     # noun tokens that arent stop words or punctuations
@@ -97,3 +97,17 @@ def countWords(concatedToots, count):
     # five most common noun tokens
     noun_freq = Counter(nouns)
     return noun_freq.most_common(count)
+
+def createWordCountPerSentiment(translatedToots):
+    sentimentList = []
+    for sentiment in ['positive', 'neutral', 'negative']:
+        tootsSeries = translatedToots[translatedToots['sentiment'] == sentiment].toot
+        wordCounts = countWords(tootsSeries.str.cat(sep=' '), 5)
+        countList = []
+        for count in wordCounts:
+             countList.append(str(count[0]) + ' (' + str(count[1]) + ')')
+        list2String = ', '.join(countList)
+        sentimentString = sentiment + ': ' + list2String
+        sentimentList.append(sentimentString)
+    wordCountsPerSentiments = '\n'.join(sentimentList)
+    return wordCountsPerSentiments
