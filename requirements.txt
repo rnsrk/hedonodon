@@ -6,3 +6,6 @@ vader-multi
 numpy
 pytz
 transformers
+langdetect
+germansentiment
+scipy

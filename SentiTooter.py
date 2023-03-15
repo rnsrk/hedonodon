@@ -41,22 +41,21 @@ class SentiTooter:
                 output = self.enModel(**encoded_input)
                 scores = output[0][0].detach().numpy()
                 scores = softmax(scores)
-                print(scores)
+                #print(scores)
                 sentimentIndexWithMaxScore = np.argmax(scores)
                 sentimentLabel = self.labels[sentimentIndexWithMaxScore]
                 sentiment = [sentimentLabel, 'twitter-roberta-base-sentiment', max(scores)]
-                print(sentiment)
+                #print(sentiment)
                 return sentiment
             case _:
                 compound = self.sia.polarity_scores(content)['compound']
-                print(self.sia.polarity_scores(content), 'vaderSentiment')
+                #print(self.sia.polarity_scores(content), 'vaderSentiment')
                 if compound > (1 / 3):
                     return ['positive', 'vaderSentiment']
                 elif compound < (-1 / 3):
                     return ['negative', 'vaderSentiment']
                 else:
                     return ['neutral', 'vaderSentiment']
-
 
 
     def initModel(self):
@@ -66,13 +65,3 @@ class SentiTooter:
         model = AutoModelForSequenceClassification.from_pretrained(self.enModelType)
         model.save_pretrained(self.enModelType)
         return model, tokenizer
-
-    # # TF
-    # model = TFAutoModelForSequenceClassification.from_pretrained(MODEL)
-    # model.save_pretrained(MODEL)
-
-    # text = "Good night 😊"
-    # encoded_input = tokenizer(text, return_tensors='tf')
-    # output = model(encoded_input)
-    # scores = output[0][0].numpy()
-    # scores = softmax(scores)

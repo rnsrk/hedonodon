@@ -3,7 +3,6 @@ import pandas as pd
 from sqlalchemy import desc, select
 from Tables import Toots
 
-
 def calculateSentimentCount():
     query = f'''SELECT DATE(datetime) as date, sentiment, COUNT(sentiment) as sentimentCount
                 FROM Toots
@@ -30,6 +29,17 @@ def calculateSentimentMean(dataframe):
                 'sentimentsMean': sentimentMean
             }
         ]
+    )
+
+def calculateWordCount():
+    query = f'''SELECT DATE(datetime) as date, language, sentiment, toot
+                FROM Toots
+                WHERE datetime >= DATE("now","-1 day")
+                AND datetime < DATE("now")'''
+    return pd.read_sql(
+        query,
+        engine,
+        parse_dates=["datetime"]
     )
 
 class CRUDManager():

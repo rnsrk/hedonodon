@@ -1,4 +1,4 @@
-from CRUDManager import CRUDManager, calculateSentimentCount, calculateSentimentMean
+from CRUDManager import CRUDManager, calculateSentimentCount, calculateSentimentMean, calculateWordCount
 from datetime import datetime, date
 from DbSetup import init_db
 import locale
@@ -25,12 +25,16 @@ crudManager = CRUDManager()
 
 lastTootId = crudManager.getLastToot()
 tootsDataframe = tootCrawler.buildTootsDataframe(lastTootId)
-exit()
+
 if not tootsDataframe.empty:
     crudManager.saveToDatabase(tootsDataframe, 'Toots', useIndex=False)
 else:
     print('Nothing changed since last database insert!')
 
+wordCounts = calculateWordCount()
+print(wordCounts);
+print("exit programm")
+exit()
 sentimentsYesterday = calculateSentimentCount()
 sentimentMeansYesterday = calculateSentimentMean(sentimentsYesterday)
 
