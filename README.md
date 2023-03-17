@@ -2,10 +2,10 @@
 ## Prerequisites
 Install the dependencies with `python -m pip install -r requirements.txt`.
 Install SpaCys nlp model with `python -m spacy download en_core_web_lg`.
-If the automatic download of the twitter-roberta-base-sentiment model and tokenizer fail, go to the model pages on hugging face (see models section) and download the to the respective folder (cardiffnlp/twitter-roberta-base-sentiment)
+If the automatic download of the twitter-roberta-base-sentiment model and tokenizer fail, go to the model pages on hugging face (see models section) and download the to the respective folder (cardiffnlp/twitter-roberta-base-sentiment).
 
 ## Purpose
-Hedonodon fetched toots from fedihum.org and calculates the sentiments, sentiment mean and word frequencies of each day, and creates fancy diagrams from the data.
+Hedonodon fetch toots from fedihum.org and calculates the sentiments, sentiment mean and word frequencies of each day, and creates fancy diagrams from the data.
 
 ## Motivation
 This tool was created to understand how sentiment analyses and nlp methods works, so it may lacks of proper use of models etc...
