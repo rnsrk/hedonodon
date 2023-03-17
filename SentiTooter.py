@@ -154,7 +154,7 @@ def countWords(concatedToots: str, number: int) -> list:
         list
         List containing tuple of word and word frequency.
     """
-    nlp = spacy.load('en_core_web_md')
+    nlp = spacy.load('en_core_web_lg')
     doc = nlp(concatedToots)
 
     # noun tokens that arent stop words or punctuations
