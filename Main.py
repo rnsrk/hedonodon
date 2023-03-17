@@ -1,3 +1,19 @@
+"""
+Hedonodon toot sentiment analyzer.
+
+This programm fetches toots from the fedihum.org Mastodon instance, calculates
+the frequencies of the sentiments (positive, neutral, negative) and the mean
+from these nominal values (even this is not statistical correct (;-_-)!, but
+not all analyzer return compounds).
+It also calculates the word count of the nouns per sentiment.
+
+It uses germansentiment for german toots, twitter-roberta-base-sentiment for
+english toots, and vaderSentiment for other languages.
+
+For the word counts I translate the toots to english with the GoogleTranslator
+first.
+"""
+
 from CRUDManager import CRUDManager, calculateSentimentCount, calculateSentimentMean, getYesterdaysToots
 from datetime import datetime, date
 from DbSetup import init_db
@@ -6,7 +22,7 @@ from MastodonAccountManager import MastodonAccountManager
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from TootCrawler import TootCrawler
-from SentiTooter import translateToots, createWordCountPerSentiment
+from SentiTooter import translateToots, createWordFrequenciesPerSentiment
 
 locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
 init_db()
@@ -40,7 +56,7 @@ else:
 print('Calculate word counts...')
 yesterdaysToots = getYesterdaysToots()
 translatedToots = translateToots(yesterdaysToots)
-wordCountsPerSentiment = createWordCountPerSentiment(translatedToots)
+wordCountsPerSentiment = createWordFrequenciesPerSentiment(translatedToots)
 print('done!')
 
 print(wordCountsPerSentiment);
@@ -116,6 +132,7 @@ plotFileUrl = f'./plots/{TodayDate}.png'
 plt.savefig(plotFileUrl)
 print('done!')
 
-media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the sentiment mean up to {TodayDate}.")
-mastodonInstance.status_post(f'The moods of the toots on and up to {TodayDate}.\nWord counts per sentiment:\n{wordCountsPerSentiment}', media_ids=media, language='en')
-
+print('Send toot...')
+#media = mastodonInstance.media_post(plotFileUrl, mime_type="image/png", description=f"Sentiment analysis of local timeline on fedihum.org, showing the moods of the toots on, and the sentiment mean up to {TodayDate}.")
+#mastodonInstance.status_post(f'The moods of the toots on and up to {TodayDate}.\nWord counts per sentiment:\n{wordCountsPerSentiment}', media_ids=media, language='en')
+print('done!')

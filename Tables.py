@@ -1,3 +1,5 @@
+"""This script containing the table definitions for the database."""
+
 from DbSetup import Base
 from sqlalchemy import Column, Date, Integer, Float, String
 
@@ -13,8 +15,6 @@ class Toots(Base):
     toot = Column(String(600))
     userName = Column(String(255))
     userId = Column(String(255))
-
-
 
 class SentimentCounts(Base):
     __tablename__ = 'SentimentCounts'
